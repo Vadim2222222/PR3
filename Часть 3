@@ -1,0 +1,397 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+public class Task1_Calculator extends JFrame {
+
+    private final JTextField field1 = new JTextField(10);
+    private final JTextField field2 = new JTextField(10);
+    private final JLabel resultLabel = new JLabel("Result: —", JLabel.CENTER);
+
+    public Task1_Calculator() {
+        super("Калькулятор — Задание 1");
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setLayout(new GridLayout(5, 2, 5, 5));
+        setSize(600, 400);
+        setLocationRelativeTo(null);
+
+        add(new JLabel("Первое число:"));
+        add(field1);
+        add(new JLabel("Второе число:"));
+        add(field2);
+
+        JPanel buttonsPanel = new JPanel(new GridLayout(1, 4, 3, 3));
+        JButton addBtn = new JButton("+");
+        JButton subBtn = new JButton("−");
+        JButton mulBtn = new JButton("×");
+        JButton divBtn = new JButton("÷");
+        buttonsPanel.add(addBtn);
+        buttonsPanel.add(subBtn);
+        buttonsPanel.add(mulBtn);
+        buttonsPanel.add(divBtn);
+
+        add(buttonsPanel);
+        add(resultLabel);
+
+        addBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                calc('+');
+            }
+        });
+
+        subBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                calc('-');
+            }
+        });
+
+        mulBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                calc('*');
+            }
+        });
+
+        divBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                calc('/');
+            }
+        });
+    }
+
+    private void calc(char op) {
+        try {
+            double a = Double.parseDouble(field1.getText().trim().replace(',', '.'));
+            double b = Double.parseDouble(field2.getText().trim().replace(',', '.'));
+            double result;
+            switch (op) {
+                case '+': result = a + b; break;
+                case '-': result = a - b; break;
+                case '*': result = a * b; break;
+                case '/':
+                    if (b == 0) throw new ArithmeticException("Деление на ноль!");
+                    result = a / b;
+                    break;
+                default: return;
+            }
+            resultLabel.setText("Result: " + result);
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Ошибка: введите корректные числа!",
+                    "Ошибка ввода", JOptionPane.ERROR_MESSAGE);
+        } catch (ArithmeticException ex) {
+            JOptionPane.showMessageDialog(this,
+                    ex.getMessage(), "Ошибка", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> new Task1_Calculator().setVisible(true));
+    }
+}
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+public class Task2_Countries extends JFrame {
+
+    private final JComboBox<String> comboBox;
+    private final JTextArea infoArea = new JTextArea(8, 40);
+
+    private static final String[] COUNTRIES = {"Australia", "China", "England", "Russia"};
+
+    public Task2_Countries() {
+        super("Hello Swing");
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setLayout(new BorderLayout(5, 5));
+        setSize(450, 300);
+        setLocationRelativeTo(null);
+
+        JPanel top = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        top.add(new JLabel("Выберите страну:"));
+        comboBox = new JComboBox<>(COUNTRIES);
+        top.add(comboBox);
+        add(top, BorderLayout.NORTH);
+
+        infoArea.setEditable(false);
+        infoArea.setLineWrap(true);
+        infoArea.setWrapStyleWord(true);
+        add(new JScrollPane(infoArea), BorderLayout.CENTER);
+
+        comboBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String country = (String) comboBox.getSelectedItem();
+                infoArea.setText(getCountryInfo(country));
+            }
+        });
+
+        infoArea.setText(getCountryInfo(COUNTRIES[0]));
+    }
+
+    private String getCountryInfo(String country) {
+        switch (country) {
+            case "Australia":
+                return "Австралия — государство в Южном полушарии, столица — Канберра. " +
+                        "Население около 26 млн человек.";
+            case "China":
+                return "Китай — государство в Восточной Азии, столица — Пекин. " +
+                        "Самая густонаселённая страна мира.";
+            case "England":
+                return "Англия — часть Соединённого Королевства, столица — Лондон. " +
+                        "Родина Шекспира и Биг-Бена.";
+            case "Russia":
+                return "Россия — крупнейшая страна мира, столица — Москва. " +
+                        "Площадь 17,1 млн км².";
+            default:
+                return "Информация отсутствует.";
+        }
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> new Task2_Countries().setVisible(true));
+    }
+}
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
+public class Task3_MenuApp extends JFrame {
+
+    private final JTextArea textArea = new JTextArea(15, 50);
+
+    public Task3_MenuApp() {
+        super("Hello Swing");
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setSize(600, 400);
+        setLocationRelativeTo(null);
+        setLayout(new BorderLayout(5, 5));
+
+        JMenuBar menuBar = new JMenuBar();
+
+        // ----- File -----
+        JMenu fileMenu = new JMenu("File");
+
+        JMenuItem saveItem = new JMenuItem("Сохранить");
+        saveItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                saveToFile();
+            }
+        });
+
+        JMenuItem exitItem = new JMenuItem("Выйти");
+        exitItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.exit(0);
+            }
+        });
+
+        fileMenu.add(saveItem);
+        fileMenu.addSeparator();
+        fileMenu.add(exitItem);
+
+        // ----- Edit -----
+        JMenu editMenu = new JMenu("Edit");
+
+        JMenuItem copyItem = new JMenuItem("Копировать");
+        copyItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                textArea.copy();
+            }
+        });
+
+        JMenuItem cutItem = new JMenuItem("Вырезать");
+        cutItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                textArea.cut();
+            }
+        });
+
+        JMenuItem pasteItem = new JMenuItem("Вставить");
+        pasteItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                textArea.paste();
+            }
+        });
+
+        editMenu.add(copyItem);
+        editMenu.add(cutItem);
+        editMenu.add(pasteItem);
+
+        // ----- Help -----
+        JMenu helpMenu = new JMenu("Help");
+        JMenuItem aboutItem = new JMenuItem("О программе");
+        aboutItem.addActionListener(e ->
+                JOptionPane.showMessageDialog(this,
+                        "Лабораторная работа №15. Меню и обработка событий.",
+                        "О программе",
+                        JOptionPane.INFORMATION_MESSAGE));
+        helpMenu.add(aboutItem);
+
+        menuBar.add(fileMenu);
+        menuBar.add(editMenu);
+        menuBar.add(helpMenu);
+        setJMenuBar(menuBar);
+
+        // ----- Кнопки -----
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JButton btn1 = new JButton("Button 1");
+        JButton btn2 = new JButton("Button 2");
+        btn1.addActionListener(e ->
+                JOptionPane.showMessageDialog(this, "Нажата Button 1"));
+        btn2.addActionListener(e ->
+                JOptionPane.showMessageDialog(this, "Нажата Button 2"));
+        topPanel.add(btn1);
+        topPanel.add(btn2);
+        add(topPanel, BorderLayout.NORTH);
+
+        // ----- Текст -----
+        textArea.setLineWrap(true);
+        textArea.setWrapStyleWord(true);
+        textArea.setText("This is the area you can write text...");
+        add(new JScrollPane(textArea), BorderLayout.CENTER);
+    }
+
+    private void saveToFile() {
+        JFileChooser chooser = new JFileChooser();
+        if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+            File file = chooser.getSelectedFile();
+            try (FileWriter writer = new FileWriter(file)) {
+                writer.write(textArea.getText());
+                JOptionPane.showMessageDialog(this, "Файл сохранён: " + file.getAbsolutePath());
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(this,
+                        "Ошибка при сохранении: " + ex.getMessage(),
+                        "Ошибка", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> new Task3_MenuApp().setVisible(true));
+    }
+}
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+public class Task4_SimpleCalc extends JFrame {
+
+    private final JTextField display = new JTextField("0");
+    private double previous = 0;
+    private char operation = 0;
+    private boolean newInput = true;
+    private boolean justCalculated = false;
+
+    public Task4_SimpleCalc() {
+        super("Simple Calculator");
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setSize(320, 400);
+        setLocationRelativeTo(null);
+        setLayout(new BorderLayout(5, 5));
+
+        display.setHorizontalAlignment(JTextField.RIGHT);
+        display.setEditable(false);
+        display.setFont(new Font("Arial", Font.BOLD, 24));
+        add(display, BorderLayout.NORTH);
+
+        JPanel buttonPanel = new JPanel(new GridLayout(4, 4, 5, 5));
+        String[] labels = {
+                "7", "8", "9", "/",
+                "4", "5", "6", "*",
+                "1", "2", "3", "-",
+                "0", ".", "=", "+"
+        };
+
+        for (String label : labels) {
+            JButton btn = new JButton(label);
+            btn.setFont(new Font("Arial", Font.BOLD, 18));
+            btn.setFocusPainted(false);
+
+            btn.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    handleClick(label);
+                }
+            });
+
+            buttonPanel.add(btn);
+        }
+        add(buttonPanel, BorderLayout.CENTER);
+    }
+
+    private void handleClick(String label) {
+        if (label.matches("[0-9.]")) {
+            if (newInput || justCalculated) {
+                display.setText(label.equals(".") ? "0." : label);
+                newInput = false;
+                justCalculated = false;
+            } else {
+                if (label.equals(".") && display.getText().contains(".")) return;
+                display.setText(display.getText() + label);
+            }
+            return;
+        }
+
+        if (label.matches("[+\\-*/]")) {
+            previous = Double.parseDouble(display.getText());
+            operation = label.charAt(0);
+            newInput = true;
+            justCalculated = false;
+            return;
+        }
+
+        if (label.equals("=")) {
+            if (operation == 0) return;
+            double current = Double.parseDouble(display.getText());
+            double result = 0;
+            switch (operation) {
+                case '+': result = previous + current; break;
+                case '-': result = previous - current; break;
+                case '*': result = previous * current; break;
+                case '/':
+                    if (current == 0) {
+                        JOptionPane.showMessageDialog(this,
+                                "Деление на ноль!", "Ошибка", JOptionPane.ERROR_MESSAGE);
+                        display.setText("0");
+                        newInput = true;
+                        operation = 0;
+                        return;
+                    }
+                    result = previous / current;
+                    break;
+            }
+            display.setText(formatNumber(result));
+            operation = 0;
+            newInput = true;
+            justCalculated = true;
+        }
+    }
+
+    private String formatNumber(double d) {
+        if (d == (long) d) return String.valueOf((long) d);
+        return String.valueOf(d);
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> new Task4_SimpleCalc().setVisible(true));
+    }
+}
