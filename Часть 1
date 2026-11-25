@@ -1,0 +1,324 @@
+package task1;
+
+import javax.swing.*;
+import java.awt.*;
+
+public class MatchWindow extends JFrame {
+
+    private int milan = 0;
+    private int madrid = 0;
+
+    private final JLabel resultLabel    = new JLabel("Result: 0 X 0", JLabel.CENTER);
+    private final JLabel lastScorerLabel = new JLabel("Last Scorer: N/A", JLabel.CENTER);
+    private final JLabel winnerLabel    = new JLabel("Winner: DRAW", JLabel.CENTER);
+
+    public MatchWindow() {
+        super("AC Milan vs Real Madrid");
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setSize(400, 220);
+        setLayout(new GridLayout(5, 1, 5, 5));
+
+        JButton milanBtn = new JButton("AC Milan");
+        JButton madridBtn = new JButton("Real Madrid");
+
+        milanBtn.addActionListener(e -> {
+            milan++;
+            updateUI("AC Milan");
+        });
+
+        madridBtn.addActionListener(e -> {
+            madrid++;
+            updateUI("Real Madrid");
+        });
+
+        add(milanBtn);
+        add(madridBtn);
+        add(resultLabel);
+        add(lastScorerLabel);
+        add(winnerLabel);
+
+        setLocationRelativeTo(null);
+        setVisible(true);
+    }
+
+    private void updateUI(String lastScorer) {
+        resultLabel.setText("Result: " + milan + " X " + madrid);
+        lastScorerLabel.setText("Last Scorer: " + lastScorer);
+
+        if (milan > madrid) {
+            winnerLabel.setText("Winner: AC Milan");
+        } else if (madrid > milan) {
+            winnerLabel.setText("Winner: Real Madrid");
+        } else {
+            winnerLabel.setText("Winner: DRAW");
+        }
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(MatchWindow::new);
+    }
+}
+
+package shapes;
+
+import java.awt.Color;
+import java.awt.Graphics;
+
+public abstract class Shape {
+    protected Color color;
+    protected int x;
+    protected int y;
+
+    public Shape(Color color, int x, int y) {
+        this.color = color;
+        this.x = x;
+        this.y = y;
+    }
+
+    public abstract void draw(Graphics g);
+}
+
+package shapes;
+
+import java.awt.*;
+
+public class Circle extends Shape {
+    private final int radius;
+
+    public Circle(Color color, int x, int y, int radius) {
+        super(color, x, y);
+        this.radius = radius;
+    }
+
+    @Override
+    public void draw(Graphics g) {
+        g.setColor(color);
+        g.fillOval(x, y, radius * 2, radius * 2);
+    }
+}
+
+package shapes;
+
+import java.awt.*;
+
+public class Rect extends Shape {
+    private final int w, h;
+
+    public Rect(Color color, int x, int y, int w, int h) {
+        super(color, x, y);
+        this.w = w;
+        this.h = h;
+    }
+
+    @Override
+    public void draw(Graphics g) {
+        g.setColor(color);
+        g.fillRect(x, y, w, h);
+    }
+}
+
+package shapes;
+
+import java.awt.*;
+
+public class Triangle extends Shape {
+    private final int size;
+
+    public Triangle(Color color, int x, int y, int size) {
+        super(color, x, y);
+        this.size = size;
+    }
+
+    @Override
+    public void draw(Graphics g) {
+        g.setColor(color);
+        int[] xs = {x, x + size / 2, x + size};
+        int[] ys = {y + size, y, y + size};
+        g.fillPolygon(xs, ys, 3);
+    }
+}
+
+package task2;
+
+import shapes.Circle;
+import shapes.Rect;
+import shapes.Shape;
+import shapes.Triangle;
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+public class RandomShapesApp {
+
+    private static final Random RND = new Random();
+    private static final List<Shape> shapes = new ArrayList<>();
+
+    public static void main(String[] args) {
+        for (int i = 0; i < 20; i++) {
+            shapes.add(randomShape());
+        }
+
+        JFrame frame = new JFrame("20 случайных фигур");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(800, 600);
+
+        JPanel canvas = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                for (Shape s : shapes) {
+                    s.draw(g);
+                }
+            }
+        };
+        canvas.setBackground(Color.WHITE);
+
+        frame.add(canvas);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+    }
+
+    private static Shape randomShape() {
+        Color color = new Color(RND.nextInt(256), RND.nextInt(256), RND.nextInt(256));
+        int x = RND.nextInt(700);
+        int y = RND.nextInt(500);
+
+        switch (RND.nextInt(3)) {
+            case 0: return new Circle(color, x, y, 10 + RND.nextInt(40));
+            case 1: return new Rect(color, x, y, 10 + RND.nextInt(80), 10 + RND.nextInt(80));
+            default: return new Triangle(color, x, y, 20 + RND.nextInt(60));
+        }
+    }
+}
+
+package task3;
+
+import javax.swing.*;
+import java.io.File;
+
+public class ImageViewerApp {
+    public static void main(String[] args) {
+        if (args.length < 1) {
+            System.err.println("Использование: java task3.ImageViewerApp <путь_к_картинке>");
+            System.exit(1);
+        }
+
+        File imageFile = new File(args[0]);
+        if (!imageFile.exists()) {
+            System.err.println("Файл не найден: " + imageFile.getAbsolutePath());
+            System.exit(1);
+        }
+
+        ImageIcon icon = new ImageIcon(imageFile.getAbsolutePath());
+
+        JFrame frame = new JFrame("Просмотр: " + imageFile.getName());
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        JLabel label = new JLabel(icon, JLabel.CENTER);
+        frame.add(label);
+
+        frame.setSize(icon.getIconWidth() + 20, icon.getIconHeight() + 40);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+    }
+}
+
+package task4;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import javax.imageio.ImageIO;
+
+public class AnimationApp {
+
+    // Путь к папке с кадрами
+    private static final String FRAMES_DIR = "res/frames";
+    // Имена наших двух картинок
+    private static final String[] FRAME_NAMES = {"frame1.png", "frame2.png"};
+
+    public static void main(String[] args) {
+        // 1. Подготовка папки
+        File dir = new File(FRAMES_DIR);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+
+        // 3. Загрузка двух картинок
+        ImageIcon frame1 = new ImageIcon(new File(dir, FRAME_NAMES[0]).getAbsolutePath());
+        ImageIcon frame2 = new ImageIcon(new File(dir, FRAME_NAMES[1]).getAbsolutePath());
+
+        ImageIcon[] frames = {frame1, frame2};
+
+        // 4. Создание окна
+        JFrame window = new JFrame("Анимация из 2 картинок");
+        window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        window.setSize(320, 340); // Размер окна
+        window.setLocationRelativeTo(null);
+
+        // 5. Создание метки, где будут сменяться картинки
+        JLabel label = new JLabel(frames[0], JLabel.CENTER);
+        window.add(label);
+
+        // 6. Таймер для смены кадров
+        final int[] currentFrame = {0};
+        // 500 миллисекунд = полсекунды
+        Timer timer = new Timer(500, e -> {
+            currentFrame[0] = (currentFrame[0] + 1) % 2;
+            label.setIcon(frames[currentFrame[0]]);
+        });
+        timer.start();
+
+        // 7. Показ окна
+        window.setVisible(true);
+    }
+
+    private static void createDemoFramesIfNeeded(File dir) {
+        File f1 = new File(dir, FRAME_NAMES[0]);
+        File f2 = new File(dir, FRAME_NAMES[1]);
+        if (f1.exists() && f2.exists()) {
+            return;
+        }
+
+        System.out.println("Создание двух картинок для анимации");
+        int width = 300;
+        int height = 300;
+
+        try {
+            // Картинка 1
+            BufferedImage img1 = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+            Graphics2D g1 = img1.createGraphics();
+            g1.setColor(Color.WHITE); g1.fillRect(0, 0, width, height);
+            g1.setColor(Color.BLACK);
+            g1.setStroke(new BasicStroke(5));
+            g1.drawOval(50, 100, 200, 100); // контур глаза
+            g1.setColor(Color.BLUE);
+            g1.fillOval(130, 125, 40, 40);  // зрачок
+            g1.dispose();
+            ImageIO.write(img1, "png", f1);
+
+            // Картинка 2
+            BufferedImage img2 = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+            Graphics2D g2 = img2.createGraphics();
+            g2.setColor(Color.WHITE); g2.fillRect(0, 0, width, height);
+            g2.setColor(Color.BLACK);
+            g2.setStroke(new BasicStroke(5));
+            g2.drawArc(50, 100, 200, 100, 180, 180); // дуга (закрытый глаз)
+            g2.drawLine(60, 150, 80, 160); // реснички
+            g2.drawLine(150, 150, 150, 165);
+            g2.drawLine(240, 150, 220, 160);
+            g2.dispose();
+            ImageIO.write(img2, "png", f2);
+
+            System.out.println("Картинки успешно созданы в " + dir.getAbsolutePath());
+
+        } catch (IOException e) {
+            System.err.println("Ошибка создания картинок: " + e.getMessage());
+        }
+    }
+}
